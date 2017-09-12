@@ -110,7 +110,7 @@ def save_to_excel(policy_source, start_index, item_list):
 # 刷新主页，获取session（包含cookies信息）
 def get_request_util():
     util = RequestUtil()
-    return util.init_session('http://hd.chinatax.gov.cn/guoshui/main.jsp', useProxy=False)
+    return util.init_session('http://hd.chinatax.gov.cn/guoshui/main.jsp') # , useProxy=False
 
 
 # 获取政策列表（分页）
@@ -249,7 +249,7 @@ def start_crawl():
         return
 
     # 测试一页
-    # page_count = 1
+    # page_count = 2
 
     start_time = time.time()
     # 每页分开刷：不同代理、不同线程、重试单元
