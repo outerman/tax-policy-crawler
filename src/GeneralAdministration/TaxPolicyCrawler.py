@@ -7,7 +7,7 @@ from xlutils.copy import copy
 import os
 from bs4 import BeautifulSoup
 import threading
-import src.RequestUtil as RequestUtil
+from src.RequestUtil import RequestUtil
 import concurrent.futures
 
 # 国税总局，税收法规库的抓取
@@ -107,7 +107,7 @@ def save_to_excel(policy_source, start_index, item_list):
 
 # 刷新主页，获取session（包含cookies信息）
 def get_request_util():
-    util = RequestUtil.RequestUtil()
+    util = RequestUtil()
     return util.init_session('http://hd.chinatax.gov.cn/guoshui/main.jsp')
 
 
@@ -254,6 +254,7 @@ def get_policy_detail(request_util, item):
 
 def crawl_by_page(index, page_size):
     try:
+        start_time = time.time()
         policy_source = PolicySource('国税总局', '税收法规库', '')
         request_util = get_request_util()  # 每页分开刷：不同代理、不同线程、重试单元
         print(threading.current_thread().name + ',获取第' + str(index + 1) + '/' + str(page_size) + '页的列表数据')
@@ -272,6 +273,7 @@ def crawl_by_page(index, page_size):
         # saveToExcel(policy_source, start_index, policy_list_page)
         # start_index += len(policy_list_page)
         save_to_excel(policy_source, index * 20 + 1, policy_list_page)
+        print('finish crawling page ' + str(index) + '! take time:' + str(time.time() - start_time))
         return True
 
     except Exception as ex:
@@ -280,25 +282,24 @@ def crawl_by_page(index, page_size):
 
 
 def start_crawl():
-    page_size = get_item_summary()
-    print('page_size:' + str(page_size))
+    page_count = get_item_summary()
+    print('page_size:' + str(page_count))
 
-    if not page_size:
+    if not page_count or page_count <= 0:
         print('获取税收法规库信息失败，可能被禁止权限了。。。')
         return
 
     # 测试一页
-    page_size = 5
-    # for index in range(page_size):
-    #     threading.Thread(target=crawl_by_page, args=(index, page_size)).start()
+    # page_count = 5
 
+    start_time = time.time()
     # 每页分开刷：不同代理、不同线程、重试单元
-    page_index_to_crawl = [i for i in range(page_size)]
+    page_index_to_crawl = [i for i in range(page_count)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         round_times = 1
         while len(page_index_to_crawl) > 0:
             print('crawl for %d th round' % round_times)
-            future_to_crawl = {executor.submit(crawl_by_page, index, page_size): index for index in page_index_to_crawl}
+            future_to_crawl = {executor.submit(crawl_by_page, index, page_count): index for index in page_index_to_crawl}
             for future in concurrent.futures.as_completed(future_to_crawl):
                 index = future_to_crawl[future]
                 try:
@@ -308,7 +309,7 @@ def start_crawl():
                 except Exception as exc:
                     print('page %d crawl failed! %s' % (index, str(exc)))
             round_times += 1
-        print('all complete!')
+        print('all complete! take time:' + str(time.time() - start_time))
 
 
 # 程序启动

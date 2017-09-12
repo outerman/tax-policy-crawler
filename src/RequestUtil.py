@@ -4,7 +4,7 @@
 import random
 import requests
 import time
-from src.ProxyMgr import get_proxy
+import src.ProxyMgr as proxy
 
 
 class RequestUtil:
@@ -42,6 +42,8 @@ class RequestUtil:
                 num_retries -= 1
                 return self.post(url, param_data, num_retries, timeout=timeout)
             else:
+                # 重试失败后，删除该代理
+                proxy.delete_proxy(self.session.proxies)
                 raise  # 从新抛出该异常
 
     def get(self, url, num_retries=6, timeout=10):
@@ -55,14 +57,17 @@ class RequestUtil:
                 num_retries -= 1
                 return self.get(url, num_retries, timeout=timeout)
             else:
+                # 重试失败后，删除该代理
+                proxy.delete_proxy(self.session.proxies)
                 raise   # 从新抛出该异常
 
     # 刷新主页，获取session（包含cookies信息, ua信息）
-    def init_session(self, url):
+    def init_session(self, url, useProxy=True):
         session = requests.Session()
         self.session = session
         # 设置代理
-        self.session.proxies = get_proxy()
+        if useProxy:
+            self.session.proxies = proxy.get_proxy()
         # 设置伪造的UA
         ua_headers = {'User-Agent': random.choice(self.user_agent_list)}
         self.session.headers.update(ua_headers)
@@ -70,3 +75,4 @@ class RequestUtil:
         self.get(url)
 
         return self
+
