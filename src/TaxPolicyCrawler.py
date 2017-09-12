@@ -1,5 +1,4 @@
 # coding=utf-8
-import requests
 import time
 import random
 import xlwt
@@ -7,7 +6,9 @@ import xlrd
 from xlutils.copy import copy
 import os
 from bs4 import BeautifulSoup
-
+import threading
+import src.RequestUtil as RequestUtil
+import concurrent.futures
 
 # 国税总局，税收法规库的抓取
 # http://hd.chinatax.gov.cn/guoshui/main.jsp
@@ -20,19 +21,20 @@ class PolicySource:
     policyType = ''     # 政策类型：税收法规库、政策解读、与外国的税收条约
     taxLevel = ''       # 税种：国税、地税
 
-    def __init__(self, policyType, source, taxLevel):
-        self.policyType = policyType
+    def __init__(self, policy_type, source, tax_level):
+        self.policyType = policy_type
         self.source = source
-        self.taxLevel = taxLevel
+        self.taxLevel = tax_level
 
 
 class PolicyItem:
-    title = ''          # 标题: 国家税务总局关于卷烟消费税计税价格核定管理有关问题的公告
-    subtitle = ''       # 副标题：国家税务总局公告2017年第32号
-    date = ''           # 发文日期
-    content = ''        # 正文内容
-    publisher = ''      # 发文部门
-    url = ''            # 链接地址
+    title = ''      # 标题: 国家税务总局关于卷烟消费税计税价格核定管理有关问题的公告
+    subtitle = ''   # 副标题：国家税务总局公告2017年第32号
+    date = ''       # 发文日期
+    content = ''    # 正文内容
+    publisher = ''  # 发文部门
+    url = ''        # 链接地址
+    md5 = ''        # md5判断是否重复
 
     def __init__(self, title, url, subtitle, date, content, publisher):
         self.title = title
@@ -44,7 +46,7 @@ class PolicyItem:
 
 
 # 从table的tr节里，获取文案
-def getTextInTr(tr_tag, index):
+def get_text_in_tr(tr_tag, index):
     all_tds = tr_tag.find_all('td')
     if len(all_tds) <= index:
         return ''
@@ -55,7 +57,7 @@ def getTextInTr(tr_tag, index):
 
 
 # 结果输出到Excel
-def saveToExcel(policy_source, start_index, item_list):
+def save_to_excel(policy_source, start_index, item_list):
     filename = 'TaxPolicy.xls'
     sheet_name = '税收政策'
     is_reset = start_index == 0
@@ -104,16 +106,14 @@ def saveToExcel(policy_source, start_index, item_list):
 
 
 # 刷新主页，获取session（包含cookies信息）
-def getSession():
-    session = requests.Session()
-    session.get('http://hd.chinatax.gov.cn/guoshui/main.jsp')
-
-    return session
+def get_request_util():
+    util = RequestUtil.RequestUtil()
+    return util.init_session('http://hd.chinatax.gov.cn/guoshui/main.jsp')
 
 
 # 获取政策列表（分页）
 def get_page_size(tr_tag):
-    td_str = getTextInTr(tr_tag, 0)  # 获取第一个节点的字符串
+    td_str = get_text_in_tr(tr_tag, 0)  # 获取第一个节点的字符串
     start = td_str.find('页 1/')
 
     if start < 0:
@@ -125,7 +125,10 @@ def get_page_size(tr_tag):
     return int(td_str[start: end])
 
 
-def getItemSummary(session):
+def get_item_summary():
+    print('初始化session：')
+    request_util = get_request_util()
+    print('获取分页信息：')
     form_data = {'articleField01': '',
                  'articleField03': '',
                  'articleField04': '',
@@ -147,7 +150,7 @@ def getItemSummary(session):
                  'channelId': '',
                  'rtoken': 'fgk',
                  'shuizhong': '总局法规'}
-    page = session.post(base_url + '/action/InitNewArticle.do', form_data)
+    page = request_util.post(base_url + '/action/InitNewArticle.do', form_data)
 
     soup = BeautifulSoup(page.text, "lxml")
     all_table_tags = soup.find_all('table')
@@ -161,7 +164,7 @@ def getItemSummary(session):
         if not tr_tags:
             continue
 
-        page_size = get_page_size(tr_tags[0])   # 从第一个tr里分析页数
+        page_size = get_page_size(tr_tags[0])  # 从第一个tr里分析页数
         if page_size >= 0:
             return page_size
 
@@ -169,7 +172,7 @@ def getItemSummary(session):
 
 
 # 获取政策列表（分页）, 从1开始
-def getItemList(session, page_index):
+def get_item_list(request_util, page_index):
     form_data = {'articleField01': '',
                  'articleField03': '',
                  'articleField04': '',
@@ -192,17 +195,17 @@ def getItemList(session, page_index):
                  'cPage': page_index,
                  'rtoken': 'fgk',
                  'shuizhong': '总局法规'}
-    page = session.post(base_url + '/action/InitNewArticle.do', form_data)
+    page = request_util.post(base_url + '/action/InitNewArticle.do', form_data)
     soup = BeautifulSoup(page.text, "lxml")
     target_table = soup.find('table', {'cellspacing': "1"})
 
     if not target_table:
-        return
+        return []
 
     tr_tags = target_table.find_all('tr')
 
     if not tr_tags:
-        return
+        return []
 
     policy_list = []
     for tr in tr_tags:
@@ -216,16 +219,16 @@ def getItemList(session, page_index):
 
         policy_list.append(PolicyItem(a_tag.text, a_tag.attrs['href'], all_tds[2].text, all_tds[1].text, '', ''))
 
-    return list(policy_list)
+    return policy_list
 
 
 # 根据链接爬取详情
-def getPolicyDetail(session, item):
+def get_policy_detail(request_util, item):
     if not item or not item.url:
         return
 
     # 获取详情页
-    page = session.get(base_url + item.url[2:])
+    page = request_util.get(base_url + item.url[2:])
     soup = BeautifulSoup(page.text, "lxml")
     all_table_tags = soup.find_all('tbody')
     if not all_table_tags or len(all_table_tags) < 3:
@@ -249,11 +252,35 @@ def getPolicyDetail(session, item):
     return item
 
 
-def startCrawl():
-    session = getSession()
+def crawl_by_page(index, page_size):
+    try:
+        policy_source = PolicySource('国税总局', '税收法规库', '')
+        request_util = get_request_util()  # 每页分开刷：不同代理、不同线程、重试单元
+        print(threading.current_thread().name + ',获取第' + str(index + 1) + '/' + str(page_size) + '页的列表数据')
+        item_list = get_item_list(request_util, str(index + 1))  # 网站url从1开始
 
-    policy_source = PolicySource('国税总局', '税收法规库', '')
-    page_size = getItemSummary(session)
+        if not item_list:
+            return False
+
+        policy_list_page = []
+        for item in item_list:
+            print(threading.current_thread().name + ',抓取网页：' + item.url)
+            policy_list_page.append(get_policy_detail(request_util, item))
+            # 不能频率太快，否则会被禁止访问, 随机延迟1~3秒
+            time.sleep((1 + random.random() * 2))
+
+        # saveToExcel(policy_source, start_index, policy_list_page)
+        # start_index += len(policy_list_page)
+        save_to_excel(policy_source, index * 20 + 1, policy_list_page)
+        return True
+
+    except Exception as ex:
+        print('crawl_by_page generated an exception: %s' % str(ex))
+        return False
+
+
+def start_crawl():
+    page_size = get_item_summary()
     print('page_size:' + str(page_size))
 
     if not page_size:
@@ -261,25 +288,28 @@ def startCrawl():
         return
 
     # 测试一页
-    page_size = 1
-    start_index = 0
-    for index in range(page_size):
-        print('获取第' + str(index + 1) + '/' + str(page_size) + '页的数据')
-        item_list = getItemList(session, str(index + 1))    # 网站url从1开始
+    page_size = 5
+    # for index in range(page_size):
+    #     threading.Thread(target=crawl_by_page, args=(index, page_size)).start()
 
-        if not item_list:
-            continue
-
-        policy_list_page = []
-        for item in item_list:
-            print('抓取网页：' + item.url)
-            policy_list_page.append(getPolicyDetail(session, item))
-            # 不能频率太快，否则会被禁止访问, 随机延迟3~5秒
-            time.sleep((3 + random.random() * 2))
-
-        saveToExcel(policy_source, start_index, policy_list_page)
-        start_index += len(policy_list_page)
+    # 每页分开刷：不同代理、不同线程、重试单元
+    page_index_to_crawl = [i for i in range(page_size)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        round_times = 1
+        while len(page_index_to_crawl) > 0:
+            print('crawl for %d th round' % round_times)
+            future_to_crawl = {executor.submit(crawl_by_page, index, page_size): index for index in page_index_to_crawl}
+            for future in concurrent.futures.as_completed(future_to_crawl):
+                index = future_to_crawl[future]
+                try:
+                    data = future.result()
+                    if data:
+                        page_index_to_crawl.remove(index)
+                except Exception as exc:
+                    print('page %d crawl failed! %s' % (index, str(exc)))
+            round_times += 1
+        print('all complete!')
 
 
 # 程序启动
-startCrawl()
+start_crawl()

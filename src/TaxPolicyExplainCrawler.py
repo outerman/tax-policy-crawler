@@ -5,6 +5,7 @@ import xlrd
 from xlutils.copy import copy
 import os
 from bs4 import BeautifulSoup
+from src.ProxyMgr import get_proxy
 
 # 国税总局，政策解读
 # http://www.chinatax.gov.cn/n810341/n810760/index.html
@@ -17,10 +18,10 @@ class PolicySource:
     policyType = ''     # 政策类型：税收法规库、政策解读、与外国的税收条约
     taxLevel = ''       # 税种：国税、地税
 
-    def __init__(self, policyType, source, taxLevel):
-        self.policyType = policyType
+    def __init__(self, policy_type, source, tax_level):
+        self.policyType = policy_type
         self.source = source
-        self.taxLevel = taxLevel
+        self.taxLevel = tax_level
 
 
 class PolicyItem:
@@ -104,6 +105,7 @@ def saveToExcel(policy_source, start_index, item_list):
 def getSession():
     session = requests.Session()
     session.get('http://hd.chinatax.gov.cn/guoshui/main.jsp')
+    session.proxies = get_proxy()
 
     return session
 
