@@ -60,7 +60,7 @@ def get_text_in_tr(tr_tag, index):
 
 # 结果输出到Excel
 def save_to_excel(policy_source, start_index, item_list):
-    filename = 'TaxPolicy.xls'
+    filename = 'TaxPolicyExplain.xls'
     sheet_name = '税收政策'
     is_reset = start_index == 0
     # 先删除目标文件
@@ -254,7 +254,7 @@ def start_crawl():
     start_time = time.time()
     # 每页分开刷：不同代理、不同线程、重试单元
     page_index_to_crawl = [i for i in range(page_count)]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         round_times = 1
         while len(page_index_to_crawl) > 0:
             print('crawl for %d th round' % round_times)

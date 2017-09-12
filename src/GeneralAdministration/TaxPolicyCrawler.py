@@ -295,7 +295,7 @@ def start_crawl():
     start_time = time.time()
     # 每页分开刷：不同代理、不同线程、重试单元
     page_index_to_crawl = [i for i in range(page_count)]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         round_times = 1
         while len(page_index_to_crawl) > 0:
             print('crawl for %d th round' % round_times)
