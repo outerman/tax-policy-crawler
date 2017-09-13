@@ -16,6 +16,7 @@ from src.RequestUtil import RequestUtil
 
 
 base_url = 'http://www.chinatax.gov.cn/n810341/n810760/index.html'
+lock = threading.Lock()     # 线程同步锁，控制Excel写操作
 
 
 class PolicySource:
@@ -60,51 +61,52 @@ def get_text_in_tr(tr_tag, index):
 
 # 结果输出到Excel
 def save_to_excel(policy_source, start_index, item_list):
-    filename = 'TaxPolicyExplain.xls'
-    sheet_name = '税收政策'
-    is_reset = start_index == 0
-    # 先删除目标文件
-    if os.path.exists(filename) and is_reset:
-        os.remove(filename)
+    with lock:
+        filename = 'TaxPolicyExplain.xls'
+        sheet_name = '税收政策'
+        is_reset = start_index == 0
+        # 先删除目标文件
+        if os.path.exists(filename) and is_reset:
+            os.remove(filename)
 
-    if os.path.exists(filename):
-        # 打开Excel
-        rdbook = xlrd.open_workbook(filename)
-        book = copy(rdbook)
-        excel_sheet = book.get_sheet(0)
-    else:
-        # 生成导出文件
-        book = xlwt.Workbook()
-        excel_sheet = book.add_sheet(sheet_name)
+        if os.path.exists(filename):
+            # 打开Excel
+            rdbook = xlrd.open_workbook(filename)
+            book = copy(rdbook)
+            excel_sheet = book.get_sheet(0)
+        else:
+            # 生成导出文件
+            book = xlwt.Workbook()
+            excel_sheet = book.add_sheet(sheet_name)
 
-    # 标题行
-    if is_reset:
-        excel_sheet.write(0, 0, '序号')
-        excel_sheet.write(0, 1, '政策来源')
-        excel_sheet.write(0, 2, '政策类型')
-        excel_sheet.write(0, 3, '税种')
-        excel_sheet.write(0, 4, '标题')
-        excel_sheet.write(0, 5, '副标题')
-        excel_sheet.write(0, 6, '链接地址')
-        excel_sheet.write(0, 7, '发文日期')
-        excel_sheet.write(0, 8, '正文内容')
-        excel_sheet.write(0, 9, '发文部门')
+        # 标题行
+        if is_reset:
+            excel_sheet.write(0, 0, '序号')
+            excel_sheet.write(0, 1, '政策来源')
+            excel_sheet.write(0, 2, '政策类型')
+            excel_sheet.write(0, 3, '税种')
+            excel_sheet.write(0, 4, '标题')
+            excel_sheet.write(0, 5, '副标题')
+            excel_sheet.write(0, 6, '链接地址')
+            excel_sheet.write(0, 7, '发文日期')
+            excel_sheet.write(0, 8, '正文内容')
+            excel_sheet.write(0, 9, '发文部门')
 
-    for i in range(1, len(item_list) + 1):
-        row_item = item_list[i - 1]
-        excel_sheet.write(start_index + i, 0, start_index + i)
-        excel_sheet.write(start_index + i, 1, policy_source.source)
-        excel_sheet.write(start_index + i, 2, policy_source.policyType)
-        excel_sheet.write(start_index + i, 3, policy_source.taxLevel)
+        for i in range(1, len(item_list) + 1):
+            row_item = item_list[i - 1]
+            excel_sheet.write(start_index + i, 0, start_index + i)
+            excel_sheet.write(start_index + i, 1, policy_source.source)
+            excel_sheet.write(start_index + i, 2, policy_source.policyType)
+            excel_sheet.write(start_index + i, 3, policy_source.taxLevel)
 
-        excel_sheet.write(start_index + i, 4, row_item.title)
-        excel_sheet.write(start_index + i, 5, row_item.subtitle)
-        excel_sheet.write(start_index + i, 6, row_item.url)
-        excel_sheet.write(start_index + i, 7, row_item.date)
-        excel_sheet.write(start_index + i, 8, row_item.content)
-        excel_sheet.write(start_index + i, 9, row_item.publisher)
+            excel_sheet.write(start_index + i, 4, row_item.title)
+            excel_sheet.write(start_index + i, 5, row_item.subtitle)
+            excel_sheet.write(start_index + i, 6, row_item.url)
+            excel_sheet.write(start_index + i, 7, row_item.date)
+            excel_sheet.write(start_index + i, 8, row_item.content)
+            excel_sheet.write(start_index + i, 9, row_item.publisher)
 
-    book.save(filename)
+        book.save(filename)
 
 
 # 刷新主页，获取session（包含cookies信息）
