@@ -3,3 +3,4 @@ src/__pycache__
 src/TaxPolicy.xls
 src/GeneralAdministration/TaxPolicy.xls
 src/GeneralAdministration/TaxPolicyExplain.xls
+.scrapy
