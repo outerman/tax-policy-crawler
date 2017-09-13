@@ -1,0 +1,2 @@
+import TaxPolicyCrawlerScrapy.middlewares.RandomUserAgentMiddleware
+import TaxPolicyCrawlerScrapy.middlewares.ProxyDownloaderMiddleware
