@@ -5,3 +5,7 @@ src/GeneralAdministration/TaxPolicy.xls
 src/GeneralAdministration/TaxPolicyExplain.xls
 .scrapy
 TaxPolicyCrawlerScrapy/util/商品编码.xml
+TaxPolicyCrawlerScrapy/__pycache__
+TaxPolicyCrawlerScrapy/middlewares/__pycache__
+TaxPolicyCrawlerScrapy/spiders/__pycache__
+TaxPolicyCrawlerScrapy/util/__pycache__
