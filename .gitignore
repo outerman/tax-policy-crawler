@@ -4,3 +4,4 @@ src/TaxPolicy.xls
 src/GeneralAdministration/TaxPolicy.xls
 src/GeneralAdministration/TaxPolicyExplain.xls
 .scrapy
+TaxPolicyCrawlerScrapy/util/商品编码.xml

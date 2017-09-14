@@ -18,7 +18,7 @@ class TaxpolicycrawlerscrapyPipeline(object):
         elif spider.name == 'TaxPolicyCrawler':
             policy_source = PolicySource('国税总局', '税收法规库', '')
 
-
         # TODO: 多种存储
         # TODO: Md5，及排重
+        # TODO: 插入前的时间戳等字段
         return item
