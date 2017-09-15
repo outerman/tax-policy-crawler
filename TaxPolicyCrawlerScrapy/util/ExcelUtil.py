@@ -24,15 +24,16 @@ def save_to_excel(index_name, doc_type, item_list, is_reset=False):
         if os.path.exists(filename):
             # 打开Excel
             rdbook = xlrd.open_workbook(filename)
-            i = list(rdbook.sheet_names()).index(sheet_name)    # 确定页签index
             book = copy(rdbook)
             # 如果页签存在，则读取该页，否则新增页签
-            if i >= 0:
+            if rdbook.sheet_names().__contains__(sheet_name):
+                i = list(rdbook.sheet_names()).index(sheet_name)    # 确定页签index
                 excel_sheet = book.get_sheet(i)
+                is_create = False
             else:
                 excel_sheet = book.add_sheet(sheet_name)
+                is_create = True
 
-            is_create = False
         else:
             # 生成导出文件
             book = xlwt.Workbook()

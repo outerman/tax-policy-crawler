@@ -1,2 +1,2 @@
 from scrapy.cmdline import execute
-execute(['scrapy', 'crawl', 'TaxPolicyExplainCrawler'])  # 'TaxPolicyCrawler'
+execute(['scrapy', 'crawl', 'TaxPolicyCrawler'])  # 'TaxPolicyCrawler' #'TaxPolicyExplainCrawler'

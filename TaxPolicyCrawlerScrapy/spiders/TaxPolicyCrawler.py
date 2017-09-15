@@ -8,6 +8,7 @@ import TaxPolicyCrawlerScrapy.util.Constants as Constants
 # 国税总局，税收法规库的抓取
 # http://hd.chinatax.gov.cn/guoshui/main.jsp
 # 2017.9.8 共3531项查询结果236页
+from TaxPolicyCrawlerScrapy.util import CacheUtil
 
 base_url = 'http://hd.chinatax.gov.cn/guoshui'
 
@@ -104,7 +105,11 @@ class TaxPolicyCrawler(scrapy.Spider):
             print(threading.current_thread().name + ',抓取网页：' + url)
             if url is None:
                 continue
-            yield scrapy.Request(base_url + url[2:],
+
+            full_url = base_url + url[2:]
+            if CacheUtil.is_crawled(full_url):
+                continue
+            yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
                                  meta={'policy_item': item})

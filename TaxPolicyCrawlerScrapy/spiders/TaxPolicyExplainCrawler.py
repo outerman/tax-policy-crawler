@@ -8,6 +8,7 @@ from TaxPolicyCrawlerScrapy.items import PolicyItem
 # 国税总局，政策解读
 # http://www.chinatax.gov.cn/n810341/n810760/index.html
 # 2017.9.8 约22页 * 25行每页 = 550行
+from TaxPolicyCrawlerScrapy.util import CacheUtil
 
 base_url = 'http://www.chinatax.gov.cn/n810341/n810760/index.html'
 
@@ -49,7 +50,11 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
             print(threading.current_thread().name + ',抓取网页：' + url)
             if url is None:
                 continue
-            yield scrapy.Request(base_url.replace('index.html', '') + url,
+
+            full_url = base_url.replace('index.html', '') + url
+            if CacheUtil.is_crawled(full_url):
+                continue
+            yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
                                  meta={'policy_item': item})
