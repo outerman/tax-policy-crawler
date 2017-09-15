@@ -240,10 +240,11 @@ def get_policy_detail(request_util, item):
     target_td = all_table_tags[2].find('td')
 
     # 所有内容的<p>节
-    content_p_list = target_td.find_all('p')
-    for p in content_p_list:
-        item.content += '\n<br>\n'
-        item.content += p.text
+    item['content'] = target_td.text
+    # content_p_list = target_td.find_all('p')
+    # for p in content_p_list:
+    #     item.content += '\n<br>\n'
+    #     item.content += p.text
 
     # 签名的<p>节
     publisher_p_list = target_td.find_all('p', style=True)

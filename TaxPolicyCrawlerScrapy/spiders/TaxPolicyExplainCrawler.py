@@ -52,7 +52,7 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
                 continue
 
             full_url = base_url.replace('index.html', '') + url
-            if CacheUtil.is_crawled(full_url):
+            if CacheUtil.is_url_crawled(full_url):
                 continue
             yield scrapy.Request(full_url,
                                  method='GET',

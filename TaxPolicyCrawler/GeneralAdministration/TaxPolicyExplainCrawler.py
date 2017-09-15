@@ -205,10 +205,18 @@ def get_policy_detail(request_util, item):
 
     # 标题栏
     item.title = li_tags[0].text
-    # 发布日期
-    item.date = li_tags[1].text
-    # 来源
-    item.publisher = li_tags[1].text
+    date_and_publisher = li_tags[1].text
+
+    if str(date_and_publisher).__contains__('日期') and str(date_and_publisher).__contains__('来源'):
+        # 发布日期
+        item['date'] = str(date_and_publisher).split(' ')[0].strip()
+        # 来源
+        item['publisher'] = str(date_and_publisher).split(' ')[1].strip()
+    else:
+        # 发布日期
+        item['date'] = date_and_publisher
+        # 来源
+        item['publisher'] = date_and_publisher
 
     return item
 

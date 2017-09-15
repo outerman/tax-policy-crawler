@@ -107,7 +107,7 @@ class TaxPolicyCrawler(scrapy.Spider):
                 continue
 
             full_url = base_url + url[2:]
-            if CacheUtil.is_crawled(full_url):
+            if CacheUtil.is_url_crawled(full_url):
                 continue
             yield scrapy.Request(full_url,
                                  method='GET',
@@ -200,11 +200,12 @@ def get_policy_detail(page_text, item):
     target_td = all_table_tags[2].find('td')
 
     # 所有内容的<p>节
-    content_p_list = target_td.find_all('p')
-    item['content'] = ''
-    for p in content_p_list:
-        item['content'] += '\n<br>\n'
-        item['content'] += p.text
+    item['content'] = target_td.text
+    # content_p_list = target_td.find_all('p')
+    # item['content'] = ''
+    # for p in content_p_list:
+    #     item['content'] += '\n<br>\n'
+    #     item['content'] += p.text
 
     # 签名的<p>节
     publisher_p_list = target_td.find_all('p', style=True)
