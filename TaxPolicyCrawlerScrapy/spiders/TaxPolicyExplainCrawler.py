@@ -51,9 +51,11 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
             if url is None:
                 continue
 
-            full_url = base_url.replace('index.html', '') + url
-            if CacheUtil.is_url_crawled(full_url):
+            if CacheUtil.is_url_crawled(url):
+                print('url：' + url + ' 已经抓取过，不重复抓取')
                 continue
+
+            full_url = base_url.replace('index.html', '') + url
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,

@@ -106,9 +106,11 @@ class TaxPolicyCrawler(scrapy.Spider):
             if url is None:
                 continue
 
-            full_url = base_url + url[2:]
-            if CacheUtil.is_url_crawled(full_url):
+            if CacheUtil.is_url_crawled(url):
+                print('url：' + url + ' 已经抓取过，不重复抓取')
                 continue
+
+            full_url = base_url + url[2:]
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
