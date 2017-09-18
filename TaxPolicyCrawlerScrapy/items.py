@@ -25,6 +25,170 @@ class PolicyItem(scrapy.Item):
 
 
 class PolicySource(scrapy.Item):
-    source = scrapy.Field()         # 政策来源: 国税总局、各省市区税务局
-    policyType = scrapy.Field()     # 政策类型：税收法规库、政策解读、与外国的税收条约
-    taxLevel = scrapy.Field()       # 税种：国税、地税
+    source = scrapy.Field()  # 政策来源: 国税总局、各省市区税务局
+    policyType = scrapy.Field()  # 政策类型：税收法规库、政策解读、与外国的税收条约
+    taxLevel = scrapy.Field()  # 税种：国税、地税
+
+
+# 在ElasticSearch中index的mapping，重点在定义几个not_analyzed字段
+mappings = {
+    "policy_explain": {
+        "properties": {
+            "content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "date": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "hash_md5": {
+                "type": "keyword"
+                # "type": "string",
+                # "index": "not_analyzed",  # here
+                # "fields": {
+                #     "keyword": {
+                #         "type": "keyword",
+                #         "ignore_above": 256
+                #     }
+                # }
+            },
+            "policyType": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "publisher": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "source": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "timestamp": {
+                "type": "float"
+            },
+            "title": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "url": {
+                # "type": "string",
+                # "index": "not_analyzed",  # here
+                # "fields": {
+                #     "keyword": {
+                #         "type": "keyword",
+                #         "ignore_above": 256
+                #     }
+                # }
+                "type": "keyword"
+            }
+        }
+    },
+    "policy_law": {
+        "properties": {
+            "content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "date": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "hash_md5": {
+                "type": "keyword"
+            },
+            "policyType": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "publisher": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "source": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "subtitle": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "timestamp": {
+                "type": "float"
+            },
+            "title": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "url": {
+                "type": "keyword"
+            }
+        }
+    }
+}
