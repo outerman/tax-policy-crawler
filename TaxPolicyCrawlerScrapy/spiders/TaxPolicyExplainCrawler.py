@@ -63,7 +63,6 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
 
     # 默认解析器，在Request没有填写callback时调用：解析最后的详情，并发送到items及pipelines
     def parse(self, response):
-        # TODO: cookiejar
         yield parse_policy_detail(response.body, response.meta['policy_item'])
 
 

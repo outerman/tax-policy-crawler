@@ -16,6 +16,7 @@ from TaxPolicyCrawlerScrapy.util import ElasticSearchUtil
 def check_elastic_indices():
     if not ElasticSearchUtil.exists_index(Constants.es_index_name):
         ElasticSearchUtil.create_index(Constants.es_index_name, mapping=items.mappings)
+        # TODO: 自定义中文分词器，以提高中文搜索效果，例如elasticsearch-analysis-ik
 
 
 class ElasticSearchPipeline(object):
