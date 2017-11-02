@@ -3,15 +3,13 @@ import threading
 import scrapy
 from bs4 import BeautifulSoup
 from TaxPolicyCrawlerScrapy.items import PolicyItem
-import TaxPolicyCrawlerScrapy.util.Constants as Constants
+from TaxPolicyCrawlerScrapy.util import CacheUtil
+
 
 # 国税总局，税收法规库的抓取
 # http://hd.chinatax.gov.cn/guoshui/main.jsp
 # 2017.9.8 共3531项查询结果236页
-from TaxPolicyCrawlerScrapy.util import CacheUtil
-
 base_url = 'http://hd.chinatax.gov.cn/guoshui'
-
 
 class TaxPolicyCrawler(scrapy.Spider):
     # 框架使用的属性

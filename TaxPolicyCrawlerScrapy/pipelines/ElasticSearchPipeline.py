@@ -17,6 +17,7 @@ def check_elastic_indices():
     if not ElasticSearchUtil.exists_index(Constants.es_index_name):
         ElasticSearchUtil.create_index(Constants.es_index_name, mapping=items.mappings)
         # TODO: 自定义中文分词器，以提高中文搜索效果，例如elasticsearch-analysis-ik
+        # 看笔记，1）在ElasticSearch的docker镜像里，安装插件  2）在创建索引时候，增加analyzer和search_analyzer的配置
 
 
 class ElasticSearchPipeline(object):

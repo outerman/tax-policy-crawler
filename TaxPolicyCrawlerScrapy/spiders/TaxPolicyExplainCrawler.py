@@ -3,13 +3,11 @@ import threading
 import scrapy
 from bs4 import BeautifulSoup
 from TaxPolicyCrawlerScrapy.items import PolicyItem
-
+from TaxPolicyCrawlerScrapy.util import CacheUtil
 
 # 国税总局，政策解读
 # http://www.chinatax.gov.cn/n810341/n810760/index.html
 # 2017.9.8 约22页 * 25行每页 = 550行
-from TaxPolicyCrawlerScrapy.util import CacheUtil
-
 base_url = 'http://www.chinatax.gov.cn/n810341/n810760/index.html'
 
 
