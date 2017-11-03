@@ -30,6 +30,9 @@ class Shui5ExplainCrawler(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.Request(base_url + '/article/FaGuiJieDu/', method='GET', headers=self.headers, callback=self.parse_main)
+        # 测试带分页的
+        # yield scrapy.Request('http://www.shui5.cn/article/FaGuiJieDu/12_110.html', method='GET', headers=self.headers,
+        #                      callback=self.parse_list)
 
     # 刷新了主页后的解析：获取了cookies，下一步抓取分页总数summary
     def parse_main(self, response):
@@ -74,7 +77,27 @@ class Shui5ExplainCrawler(scrapy.Spider):
 
     # 默认解析器，在Request没有填写callback时调用：解析最后的详情，并发送到items及pipelines
     def parse(self, response):
-        yield get_policy_detail(response.body, response.meta['policy_item'])
+        # 详情页里，有可能也有翻页
+        item = response.meta['policy_item']
+        soup = BeautifulSoup(response.body, "lxml")
+        if '$' not in item['url']:  # 如果含有$, 表示已经是翻页后的页面，不需要重复解析
+            page_links_tag = soup.find('td', {'class': 'page_links'})
+            if page_links_tag is not None:
+                a_tags = page_links_tag.find_all('a')
+                if a_tags is not None:
+                    for a_tag in a_tags:
+                        if '页' not in a_tag.text:
+                            page_name = a_tag.attrs['href']
+                            origin_page_name = page_name.split('$')[0] + '.' + page_name.split('.')[1]
+                            url = item['url'].replace(origin_page_name, page_name)
+
+                            new_item = PolicyItem(url=url, date=item['date'])
+                            yield scrapy.Request(url,
+                                                 method='GET',
+                                                 headers=self.headers,
+                                                 meta={'policy_item': new_item})
+
+        yield get_policy_detail(soup, response.meta['policy_item'])
 
 
 # 解析分页总数
@@ -130,21 +153,21 @@ def parse_item_list(page_text):
 
 
 # 根据链接爬取详情
-def get_policy_detail(page_text, item):
+def get_policy_detail(soup, item):
     if not item or not item.get('url'):
         return
 
-    # 获取详情页
-    soup = BeautifulSoup(page_text, "lxml")
-
+    # 标题
     title_tag = soup.find('div', {'class': "articleTitle"})
     if title_tag is not None:
         item['title'] = title_tag.text
 
+    # 来源，作者
     publisher_tag = soup.find('div', {'class': "articleResource"})
     if publisher_tag is not None:
         item['publisher'] = publisher_tag.text.split('<script')[0]
 
+    # 内容
     content_tag = soup.find('div', {'class': "arcContent"})
     if content_tag is not None:
         item['content'] = content_tag.text
