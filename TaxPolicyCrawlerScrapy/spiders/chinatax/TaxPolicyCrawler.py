@@ -2,19 +2,31 @@
 import threading
 import scrapy
 from bs4 import BeautifulSoup
-from TaxPolicyCrawlerScrapy.items import PolicyItem
-from TaxPolicyCrawlerScrapy.util import CacheUtil
-
+from TaxPolicyCrawlerScrapy.items import PolicyItem, PolicySource
+from TaxPolicyCrawlerScrapy.util import CacheUtil, Constants
 
 # 国税总局，税收法规库的抓取
 # http://hd.chinatax.gov.cn/guoshui/main.jsp
 # 2017.9.8 共3531项查询结果236页
 base_url = 'http://hd.chinatax.gov.cn/guoshui'
 
+
 class TaxPolicyCrawler(scrapy.Spider):
     # 框架使用的属性
-    name = 'TaxPolicyCrawler'
+    policy_source = PolicySource()
+    doc_type = Constants.es_type_law
+    policy_source['source'] = '国税总局'
+    policy_source['policyType'] = '税收法规库'
+    name = "TaxPolicyCrawler"  # spider必须要有name属性，否则scrapy不做识别
+
+    # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+    #     # self.name = self.__class__.name  # spider必须要有name属性，否则scrapy不做识别
+    #     self.policy_source['source'] = '国税总局'
+    #     self.policy_source['policyType'] = '税收法规库'
 
     def start_requests(self):
         yield scrapy.Request(base_url + '/main.jsp', method='GET', headers=self.headers, callback=self.parse_main)
@@ -108,7 +120,7 @@ class TaxPolicyCrawler(scrapy.Spider):
                 print('url：' + url + ' 已经抓取过，不重复抓取')
                 continue
 
-            full_url = base_url + url[2:]
+            full_url = url      # base_url + url[2:]
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
@@ -177,7 +189,7 @@ def parse_item_list(page_text):
             continue
 
         policy_list.append(PolicyItem(title=a_tag.text,
-                                      url=a_tag.attrs['href'],
+                                      url=base_url + a_tag.attrs['href'][2:],
                                       subtitle=all_tds[2].text,
                                       date=all_tds[1].text))
 

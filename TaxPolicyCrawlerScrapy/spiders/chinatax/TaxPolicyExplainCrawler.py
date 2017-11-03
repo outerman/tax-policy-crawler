@@ -2,8 +2,8 @@
 import threading
 import scrapy
 from bs4 import BeautifulSoup
-from TaxPolicyCrawlerScrapy.items import PolicyItem
-from TaxPolicyCrawlerScrapy.util import CacheUtil
+from TaxPolicyCrawlerScrapy.items import PolicyItem, PolicySource
+from TaxPolicyCrawlerScrapy.util import CacheUtil, Constants
 
 # 国税总局，政策解读
 # http://www.chinatax.gov.cn/n810341/n810760/index.html
@@ -13,8 +13,19 @@ base_url = 'http://www.chinatax.gov.cn/n810341/n810760/index.html'
 
 class TaxPolicyExplainCrawler(scrapy.Spider):
     # 框架使用的属性
-    name = 'TaxPolicyExplainCrawler'
+    policy_source = PolicySource()
+    doc_type = Constants.es_type_explain
+    name = "TaxPolicyExplainCrawler"  # spider必须要有name属性，否则scrapy不做识别
+    policy_source['source'] = '国税总局'
+    policy_source['policyType'] = '政策解读'
+    # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+    #     self.name = self.__class__.name  # spider必须要有name属性，否则scrapy不做识别
+    #     self.policy_source['source'] = '国税总局'
+    #     self.policy_source['policyType'] = '政策解读'
 
     def start_requests(self):
         yield scrapy.Request(base_url, method='GET', headers=self.headers, callback=self.parse_summary)
@@ -53,7 +64,7 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
                 print('url：' + url + ' 已经抓取过，不重复抓取')
                 continue
 
-            full_url = base_url.replace('index.html', '') + url
+            full_url = url          # base_url.replace('index.html', '') + url
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
@@ -105,7 +116,7 @@ def parse_item_list(page_text):
         if not a_tag:
             continue
 
-        policy_list.append(PolicyItem(title=dd.text, url=a_tag.attrs['href']))
+        policy_list.append(PolicyItem(title=dd.text, url=(base_url.replace('index.html', '') + a_tag.attrs['href'])))
 
     return policy_list
 
