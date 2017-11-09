@@ -124,7 +124,8 @@ class TaxPolicyCrawler(scrapy.Spider):
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
-                                 meta={'policy_item': item})
+                                 meta={'policy_item': item},
+                                 priority=1)        # 抓取详情的request的优先级，高于抓取列表的，试图尽量一页一页的抓取
 
     # 默认解析器，在Request没有填写callback时调用：解析最后的详情，并发送到items及pipelines
     def parse(self, response):
