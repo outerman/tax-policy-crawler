@@ -1,18 +1,30 @@
-from scrapy.cmdline import execute
-# execute(['scrapy', 'crawl', 'TaxPolicyExplainCrawler'])  # 'TaxPolicyCrawler' #'TaxPolicyExplainCrawler'
-execute(['scrapy', 'crawl', 'TaxPolicyCrawler'])
+# # 简单的跑一个Crawler，使用当前配置
+# from scrapy.cmdline import execute
+# execute(['scrapy', 'crawl', 'TaxPolicyCrawler']) # 'TaxPolicyCrawler' #'TaxPolicyExplainCrawler'
 
 
+# 使用CrawlerProcess，"并行"跑一组Crawler，使用指定配置
+from scrapy.crawler import CrawlerProcess
+from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyCrawler import TaxPolicyCrawler
+from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyExplainCrawler import TaxPolicyExplainCrawler
+from scrapy.utils.project import get_project_settings
 
-# from twisted.internet import reactor, defer
+process = CrawlerProcess(get_project_settings())
+process.crawl(TaxPolicyCrawler)
+process.crawl(TaxPolicyExplainCrawler)
+process.start()
+
+
+# # 使用CrawlerRunner，"并行"跑一组Crawler，使用指定配置
 # from twisted.internet import reactor
 # from scrapy.crawler import CrawlerRunner
 # from scrapy.utils.log import configure_logging
-# from TaxPolicyCrawlerScrapy.spiders.TaxPolicyCrawler import TaxPolicyCrawler
-# from TaxPolicyCrawlerScrapy.spiders.TaxPolicyExplainCrawler import TaxPolicyExplainCrawler
-
+# from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyCrawler import TaxPolicyCrawler
+# from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyExplainCrawler import TaxPolicyExplainCrawler
+# from scrapy.utils.project import get_project_settings
+#
 # configure_logging()
-# runner = CrawlerRunner()
+# runner = CrawlerRunner(get_project_settings())
 # runner.crawl(TaxPolicyCrawler)
 # runner.crawl(TaxPolicyExplainCrawler)
 # d = runner.join()
@@ -22,8 +34,13 @@ execute(['scrapy', 'crawl', 'TaxPolicyCrawler'])
 # reactor.run()
 
 
-
-
+# # 使用CrawlerRunner，"串行"跑一组Crawler，使用指定配置
+# from twisted.internet import reactor, defer
+# from scrapy.crawler import CrawlerRunner
+# from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyCrawler import TaxPolicyCrawler
+# from TaxPolicyCrawlerScrapy.spiders.chinatax.TaxPolicyExplainCrawler import TaxPolicyExplainCrawler
+# from scrapy.utils.log import configure_logging
+#
 # configure_logging()
 # runner = CrawlerRunner()
 #
@@ -34,15 +51,4 @@ execute(['scrapy', 'crawl', 'TaxPolicyCrawler'])
 #     reactor.stop()
 #
 # crawl()
-# reactor.run()
-
-
-
-
-
-
-# from scrapy.crawler import CrawlerProcess
-# process = CrawlerProcess()
-# process.crawl(TaxPolicyCrawler)
-# process.crawl(TaxPolicyExplainCrawler)
-# process.start()
+# reactor.run() # the script will block here until the last crawl call is finished
