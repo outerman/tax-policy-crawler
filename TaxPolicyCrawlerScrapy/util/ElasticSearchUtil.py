@@ -24,7 +24,7 @@ def exists_by_url(url):
         ret = es.search(index=Constants.es_index_name,
                         doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
                         body=query)
-        print(str(ret))
+        # print(str(ret))
         return ret.get('hits').get('total') > 0
     except Exception as ex:
         print(ex)
@@ -38,7 +38,7 @@ def exists_by_md5(md5):
         ret = es.search(index=Constants.es_index_name,
                         doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
                         body=query)
-        print(str(ret))
+        # print(str(ret))
         return ret.get('hits').get('total') > 0
     except Exception as ex:
         print(ex)
