@@ -28,6 +28,19 @@ class TaxPolicyCrawler(scrapy.Spider):
     #     self.policy_source['source'] = '国税总局'
     #     self.policy_source['policyType'] = '税收法规库'
 
+    # 蜘蛛打开的时执行
+    def open_spider(self, spider):
+        pass
+
+    # 蜘蛛关闭时执行
+    def close_spider(self, spider):
+        pass
+
+    # 可访问核心组件比如配置和信号，并注册钩子函数到Scrapy中
+    # def from_crawler(cls, crawler, **kwargs):
+    # # 需要返回一个Crawler
+    #     pass
+
     def start_requests(self):
         yield scrapy.Request(base_url + '/main.jsp', method='GET', headers=self.headers, callback=self.parse_main)
 
