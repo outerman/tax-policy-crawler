@@ -14,10 +14,16 @@ from TaxPolicyCrawlerScrapy.util import ElasticSearchUtil
 
 # 检查ElasticSearch的相关索引是否已经创建，如果没有则创建之（因为不能单纯使用默认的索引）
 def check_elastic_indices():
+    # 如果索引不存在，则创建索引
     if not ElasticSearchUtil.exists_index(Constants.es_index_name):
         ElasticSearchUtil.create_index(Constants.es_index_name, mapping=items.mappings)
         # TODO: 自定义中文分词器，以提高中文搜索效果，例如elasticsearch-analysis-ik
         # 看笔记，1）在ElasticSearch的docker镜像里，安装插件  2）在创建索引时候，增加analyzer和search_analyzer的配置
+
+    # 文档类型不存在，则创建文档类型
+    # for doc_type in Constants.all_doc_types:
+    #     ElasticSearchUtil.exists_doc_type(doc_type.doc_type)
+    #     doc_type.es_mapping
 
 
 class ElasticSearchPipeline(object):
