@@ -3,7 +3,6 @@
 # Elasticsearch相关接口
 from elasticsearch import Elasticsearch
 import TaxPolicyCrawlerScrapy.util.Constants as Constants
-from TaxPolicyCrawlerScrapy.pipelines import ElasticSearchPipeline
 
 es = Elasticsearch(hosts=[{"host": "172.16.20.150", "port": 9200}])
 
@@ -13,7 +12,8 @@ def search_by_key(key):
     query = {"query": {"match": {"content": key}}}
     ret = es.search(index=Constants.es_index_name,
                     # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
-                    doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                    # doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                    doc_type=Constants.default_doc_type,
                     body=query)
     print(str(ret))
     return ret
@@ -25,7 +25,8 @@ def exists_by_url(url):
     try:
         ret = es.search(index=Constants.es_index_name,
                         # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
-                        doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                        # doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                        doc_type=Constants.default_doc_type,
                         body=query)
         # print(str(ret))
         return ret.get('hits').get('total') > 0
@@ -40,7 +41,8 @@ def exists_by_md5(md5):
     try:
         ret = es.search(index=Constants.es_index_name,
                         # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
-                        doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                        # doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
+                        doc_type=Constants.default_doc_type,
                         body=query)
         # print(str(ret))
         return ret.get('hits').get('total') > 0
@@ -72,10 +74,10 @@ def exists_index(index_name):
 
 # 保存爬取的数据
 def save(index, doc_type, body):
-    return es.index(index=index, doc_type=doc_type, body=body)
-
+    return es.index(index=index, doc_type=Constants.default_doc_type, body=body)
 
 # 测试搜索
+# create_index(Constants.es_index_name, mapping=Constants.default_es_mapping)# es_mapping)
 # search_by_key('2017')
 # delete_index(Constants.es_index_name)
 # ElasticSearchPipeline.check_elastic_indices()

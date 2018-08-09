@@ -7,11 +7,12 @@ from TaxPolicyCrawlerScrapy.items import PolicySource
 from TaxPolicyCrawlerScrapy.util import Constants
 
 
-def get_es_body(policy_source, item, hash_md5, timestamp):
+def get_es_body(doc_type, policy_source, item, hash_md5, timestamp):
     _dict = dict(policy_source.__dict__['_values'])
     _dict.update(item.__dict__['_values'])
     _dict['hash_md5'] = hash_md5
     _dict['timestamp'] = timestamp
+    _dict['doc_type'] = doc_type
     return _dict
 
 
@@ -31,4 +32,4 @@ def convert_item(item, spider):
     timestamp = time.time()
 
     # 拼装成最终存储结构
-    return spider.doc_type, get_es_body(spider.policy_source, item, hash_md5, timestamp)
+    return spider.doc_type, get_es_body(spider.doc_type, spider.policy_source, item, hash_md5, timestamp)

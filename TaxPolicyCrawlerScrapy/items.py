@@ -32,186 +32,186 @@ class PolicySource(scrapy.Item):
 
 # 在ElasticSearch中index的mapping，重点在定义几个not_analyzed字段
 # 使用elasticsearch-analysis-ik分词插件，增加分词相关的配置analyzer和search_analyzer
-mappings = {
-    "policy_explain": {
-        "properties": {
-            "content": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "date": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                }
-            },
-            "hash_md5": {
-                "type": "keyword"
-                # "type": "string",
-                # "index": "not_analyzed",  # here
-                # "fields": {
-                #     "keyword": {
-                #         "type": "keyword",
-                #         "ignore_above": 256
-                #     }
-                # }
-            },
-            "policyType": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "publisher": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "source": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "timestamp": {
-                "type": "float"
-            },
-            "title": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "url": {
-                # "type": "string",
-                # "index": "not_analyzed",  # here
-                # "fields": {
-                #     "keyword": {
-                #         "type": "keyword",
-                #         "ignore_above": 256
-                #     }
-                # }
-                "type": "keyword"
-            }
-        }
-    },
-    "policy_law": {
-        "properties": {
-            "content": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "date": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                }
-            },
-            "hash_md5": {
-                "type": "keyword"
-            },
-            "policyType": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "publisher": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "source": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "subtitle": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "timestamp": {
-                "type": "float"
-            },
-            "title": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                    }
-                },
-                "analyzer": "ik_max_word",
-                "search_analyzer": "ik_max_word"
-            },
-            "url": {
-                "type": "keyword"
-            }
-        }
-    }
-}
+# mappings = {
+#     "policy_explain": {
+#         "properties": {
+#             "content": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "date": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 }
+#             },
+#             "hash_md5": {
+#                 "type": "keyword"
+#                 # "type": "string",
+#                 # "index": "not_analyzed",  # here
+#                 # "fields": {
+#                 #     "keyword": {
+#                 #         "type": "keyword",
+#                 #         "ignore_above": 256
+#                 #     }
+#                 # }
+#             },
+#             "policyType": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "publisher": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "source": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "timestamp": {
+#                 "type": "float"
+#             },
+#             "title": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "url": {
+#                 # "type": "string",
+#                 # "index": "not_analyzed",  # here
+#                 # "fields": {
+#                 #     "keyword": {
+#                 #         "type": "keyword",
+#                 #         "ignore_above": 256
+#                 #     }
+#                 # }
+#                 "type": "keyword"
+#             }
+#         }
+#     },
+#     "policy_law": {
+#         "properties": {
+#             "content": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "date": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 }
+#             },
+#             "hash_md5": {
+#                 "type": "keyword"
+#             },
+#             "policyType": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "publisher": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "source": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "subtitle": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "timestamp": {
+#                 "type": "float"
+#             },
+#             "title": {
+#                 "type": "text",
+#                 "fields": {
+#                     "keyword": {
+#                         "type": "keyword",
+#                         "ignore_above": 256
+#                     }
+#                 },
+#                 "analyzer": "ik_max_word",
+#                 "search_analyzer": "ik_max_word"
+#             },
+#             "url": {
+#                 "type": "keyword"
+#             }
+#         }
+#     }
+# }

@@ -7,7 +7,7 @@
 import json
 import TaxPolicyCrawlerScrapy.util.Constants as Constants
 # 把两个对象，转化为es可保存的对象，并为一个
-from TaxPolicyCrawlerScrapy import items
+# from TaxPolicyCrawlerScrapy import items
 from TaxPolicyCrawlerScrapy.pipelines import PipelineConvert
 from TaxPolicyCrawlerScrapy.util import ElasticSearchUtil
 
@@ -16,7 +16,7 @@ from TaxPolicyCrawlerScrapy.util import ElasticSearchUtil
 def check_elastic_indices():
     # 如果索引不存在，则创建索引
     if not ElasticSearchUtil.exists_index(Constants.es_index_name):
-        ElasticSearchUtil.create_index(Constants.es_index_name, mapping=items.mappings)
+        ElasticSearchUtil.create_index(Constants.es_index_name, mapping=Constants.default_es_mapping)
         # TODO: 自定义中文分词器，以提高中文搜索效果，例如elasticsearch-analysis-ik
         # 看笔记，1）在ElasticSearch的docker镜像里，安装插件  2）在创建索引时候，增加analyzer和search_analyzer的配置
 
@@ -33,6 +33,7 @@ class ElasticSearchPipeline(object):
         check_elastic_indices()
 
     def process_item(self, item, spider):
+        # TODO: 尽管这里返回了doc_type，但是由于es后续会去掉mapping-type，这里的doc_type实际上在保存时候已经不用了（用default_doc_type）
         doc_type, body_dict = PipelineConvert.convert_item(item, spider)
 
         # 拼装成最终存储结构
