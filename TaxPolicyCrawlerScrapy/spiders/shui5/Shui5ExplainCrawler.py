@@ -12,11 +12,13 @@ base_url = 'http://www.shui5.cn'
 
 
 class Shui5ExplainCrawler(scrapy.Spider):
-    # 框架使用的属性
+    # 框架使用的属性，用于分类存储
     policy_source = PolicySource()
-    doc_type = Constants.es_type_explain
-    policy_source['source'] = '税屋'
-    policy_source['policyType'] = '法规解读'
+    doc_type = Constants.DocTypeShui5.doc_type
+    policy_source['source'] = Constants.DocTypeShui5.source_name
+    policy_source['policyType'] = Constants.DocTypeShui5.policy_types['policy_explain']  # '法规解读'
+
+    # spider的名称，与setting配置里的一致；必须要有name属性，否则scrapy不做识别
     name = "Shui5ExplainCrawler"  # spider必须要有name属性，否则scrapy不做识别
 
     # 当前爬虫，request使用的headers

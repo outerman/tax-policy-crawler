@@ -3,15 +3,17 @@
 # Elasticsearch相关接口
 from elasticsearch import Elasticsearch
 import TaxPolicyCrawlerScrapy.util.Constants as Constants
+from TaxPolicyCrawlerScrapy.pipelines import ElasticSearchPipeline
 
-es = Elasticsearch()
+es = Elasticsearch(hosts=[{"host": "172.16.20.150", "port": 9200}])
 
 
 # 使用key在content里搜索
 def search_by_key(key):
     query = {"query": {"match": {"content": key}}}
     ret = es.search(index=Constants.es_index_name,
-                    doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                    # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                    doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
                     body=query)
     print(str(ret))
     return ret
@@ -22,7 +24,8 @@ def exists_by_url(url):
     query = {"query": {"term": {"url": url}}}
     try:
         ret = es.search(index=Constants.es_index_name,
-                        doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                        # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                        doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
                         body=query)
         # print(str(ret))
         return ret.get('hits').get('total') > 0
@@ -36,7 +39,8 @@ def exists_by_md5(md5):
     query = {"query": {"term": {"md5": md5}}}
     try:
         ret = es.search(index=Constants.es_index_name,
-                        doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                        # doc_type=Constants.es_type_explain + ',' + Constants.es_type_law,
+                        doc_type=Constants.DocTypeChinaTax.doc_type + ',' + Constants.DocTypeShui5.doc_type,
                         body=query)
         # print(str(ret))
         return ret.get('hits').get('total') > 0
@@ -74,7 +78,8 @@ def save(index, doc_type, body):
 # 测试搜索
 # search_by_key('2017')
 # delete_index(Constants.es_index_name)
-print(exists_by_url("../../n810341/n810760/c1152203/content.html"))
+# ElasticSearchPipeline.check_elastic_indices()
+# print(exists_by_url("../../n810341/n810760/c1152203/content.html"))
 
 # create_index(Constants.es_index_name, {
 #     "policy_explain": {

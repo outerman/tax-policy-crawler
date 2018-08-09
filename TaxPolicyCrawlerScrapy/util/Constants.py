@@ -1,7 +1,224 @@
 # coding=utf-8
 
 # 常量类
+# 基本数据设定
 
+# 所有政策法规的爬取数据，都放到一个索引下
 es_index_name = 'tax_policy'
-es_type_law = 'policy_law'
-es_type_explain = 'policy_explain'
+# es_type_law = 'policy_law'
+# es_type_explain = 'policy_explain'
+
+
+# 不同来源的数据，放到不同的doc_type下; 统一来源的不同分类，使用policy_type来区分
+# 1）国税总局
+# doc_type_chinatax = {
+#     'doc_Type': 'chinaTax',
+#     'source_name': '国税总局',
+#     'policy_types': {'policy_law': '税收法规库', 'policy_explain': '政策解读'}
+# }
+class DocTypeChinaTax:
+    doc_type = 'chinaTax'
+    source_name = '国税总局'
+    policy_types = {
+        'policy_law': '税收法规库',
+        'policy_explain': '政策解读'
+    }
+    es_mapping = {
+        "properties": {
+            "content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "date": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "hash_md5": {
+                "type": "keyword"
+                # "type": "string",
+                # "index": "not_analyzed",  # here
+                # "fields": {
+                #     "keyword": {
+                #         "type": "keyword",
+                #         "ignore_above": 256
+                #     }
+                # }
+            },
+            "policyType": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "publisher": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "source": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "timestamp": {
+                "type": "float"
+            },
+            "title": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "url": {
+                # "type": "string",
+                # "index": "not_analyzed",  # here
+                # "fields": {
+                #     "keyword": {
+                #         "type": "keyword",
+                #         "ignore_above": 256
+                #     }
+                # }
+                "type": "keyword"
+            }
+        }
+    }
+
+
+# 2）税屋
+# doc_type_shui5 = {
+#     'doc_Type': 'shui5',
+#     'source_name': '税屋',
+#     'policy_types': {'policy_explain': '法规解读'}
+# }
+class DocTypeShui5:
+    doc_type = 'shui5'
+    source_name = '税屋'
+    policy_types = {
+        'policy_explain': '法规解读'
+    }
+    es_mapping = {
+        "properties": {
+            "content": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "date": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "hash_md5": {
+                "type": "keyword"
+            },
+            "policyType": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "publisher": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "source": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "subtitle": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "timestamp": {
+                "type": "float"
+            },
+            "title": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                },
+                "analyzer": "ik_max_word",
+                "search_analyzer": "ik_max_word"
+            },
+            "url": {
+                "type": "keyword"
+            }
+        }
+    }
+
+# 配置所有的doc_type，用于初始化es中的相关结构。
+# TODO：也许有更好的方式
+all_doc_types = [DocTypeChinaTax(), DocTypeShui5()]

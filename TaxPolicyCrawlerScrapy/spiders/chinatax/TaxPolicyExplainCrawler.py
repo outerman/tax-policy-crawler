@@ -12,12 +12,15 @@ base_url = 'http://www.chinatax.gov.cn/n810341/n810760/index.html'
 
 
 class TaxPolicyExplainCrawler(scrapy.Spider):
-    # 框架使用的属性
+    # 框架使用的属性，用于分类存储
     policy_source = PolicySource()
-    doc_type = Constants.es_type_explain
-    name = "TaxPolicyExplainCrawler"  # spider必须要有name属性，否则scrapy不做识别
-    policy_source['source'] = '国税总局'
-    policy_source['policyType'] = '政策解读'
+    doc_type = Constants.DocTypeChinaTax.doc_type
+    policy_source['source'] = Constants.DocTypeChinaTax.source_name  # '国税总局'
+    policy_source['policyType'] = Constants.DocTypeChinaTax.policy_types['policy_explain']  # '政策解读'
+
+    # spider的名称，与setting配置里的一致；必须要有name属性，否则scrapy不做识别
+    name = "TaxPolicyExplainCrawler"
+
     # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
