@@ -127,7 +127,8 @@ class TaxPolicyCrawler(scrapy.Spider):
 
         for item in item_list:
             url = item.get('url')
-            print(threading.current_thread().name + ',抓取网页：' + url)
+            print(threading.current_thread().name + '，' + self.policy_source['source'] + '，' +
+                  self.policy_source['policyType'] + ',放入抓取网页队列：' + url)
             if url is None:
                 continue
 
@@ -140,7 +141,7 @@ class TaxPolicyCrawler(scrapy.Spider):
                                  method='GET',
                                  headers=self.headers,
                                  meta={'policy_item': item},
-                                 priority=1)        # 抓取详情的request的优先级，高于抓取列表的，试图尽量一页一页的抓取
+                                 priority=-1)        # priority默认0，即深度优先；如果改成1（降低优先级），则变为广度优先（抓取详情的request的优先级，高于抓取列表的，试图尽量一页一页的抓取）
 
     # 默认解析器，在Request没有填写callback时调用：解析最后的详情，并发送到items及pipelines
     def parse(self, response):

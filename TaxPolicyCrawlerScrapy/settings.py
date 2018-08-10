@@ -72,7 +72,7 @@ USE_PROXY = False
 CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -94,7 +94,7 @@ COOKIES_ENABLED = False
 DOWNLOADER_MIDDLEWARES = {
     'TaxPolicyCrawlerScrapy.middlewares.RandomUserAgentMiddleware.RandomUserAgentMiddleware': 100,
     'TaxPolicyCrawlerScrapy.middlewares.ProxyDownloaderMiddleware.ProxyDownloaderMiddleware': 200,
-    'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 210,
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 210,
 }
 
 # Enable or disable extensions
@@ -132,3 +132,13 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# TODO shenxy 尝试深度优先抓取
+# DEPTH_PRIORITY
+# 默认： 0
+# 范围： scrapy.spidermiddlewares.depth.DepthMiddleware
+# 用于根据深度调整请求优先级的整数：
+# 如果为零（默认），则不从深度进行优先级调整
+# 正值将降低优先级，即，较高深度请求将被稍后处理 ; 这通常用于做广度优先爬网（BFO）
+# 负值将增加优先级，即，较高深度请求将被更快地处理（DFO）
+# 参见：Scrapy是否以广度优先或深度优先顺序爬行？关于调整BFO或DFO的Scrapy。
+DEPTH_PRIORITY = -1
