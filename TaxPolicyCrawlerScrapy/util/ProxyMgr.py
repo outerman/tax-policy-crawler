@@ -7,6 +7,8 @@ import re
 import TaxPolicyCrawlerScrapy.settings as setting
 
 # 简单的 ip:port 的正则表达式
+from TaxPolicyCrawlerScrapy.util import Constants
+
 ip_reg_str = "^([0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,6}$"
 
 
@@ -14,7 +16,7 @@ def get_proxy():
     if not setting.USE_PROXY:
         return None
 
-    ip_address = requests.get("http://127.0.0.1:5000/get/").text
+    ip_address = requests.get("http://" + Constants.proxy_host + ":5000/get/").text
     if not ip_address:
         return {}
 
@@ -29,7 +31,7 @@ def get_proxy():
 
 
 def delete_proxy(proxy):
-    requests.get("http://127.0.0.1:5000/delete/?proxy={}".format(proxy))
+    requests.get("http://" + Constants.proxy_host + ":5000/delete/?proxy={}".format(proxy))
 
 
 # print(get_proxy())

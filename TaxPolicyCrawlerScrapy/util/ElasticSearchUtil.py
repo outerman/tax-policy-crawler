@@ -4,7 +4,7 @@
 from elasticsearch import Elasticsearch
 import TaxPolicyCrawlerScrapy.util.Constants as Constants
 
-es = Elasticsearch(hosts=[{"host": "172.16.20.150", "port": 9200}])
+es = Elasticsearch(hosts=[{"host": Constants.es_host, "port": 9200}])
 
 
 # 使用key在content里搜索
