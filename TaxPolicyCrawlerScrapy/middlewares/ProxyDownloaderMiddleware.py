@@ -15,7 +15,7 @@ class ProxyDownloaderMiddleware(object):
             request.meta['proxy'] = proxy['http']
             encoded_user_pass = base64.encodestring(proxy['user_pass'])
             request.headers['Proxy-Authorization'] = 'Basic ' + encoded_user_pass
-            print("**************ProxyMiddleware have pass************" + proxy['http'])
+            print("**************ProxyMiddleware use proxy with pass************" + proxy['http'])
         else:
-            print("**************ProxyMiddleware no pass************" + proxy['http'])
+            print("**************ProxyMiddleware use proxy without pass************" + proxy['http'])
             request.meta['proxy'] = proxy['http']
