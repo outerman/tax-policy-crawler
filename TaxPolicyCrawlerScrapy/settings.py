@@ -95,9 +95,12 @@ COOKIES_ENABLED = True
 DOWNLOADER_MIDDLEWARES = {
     'TaxPolicyCrawlerScrapy.middlewares.RandomUserAgentMiddleware.RandomUserAgentMiddleware': 100,
     'TaxPolicyCrawlerScrapy.middlewares.ProxyDownloaderMiddleware.ProxyDownloaderMiddleware': 200,
+    'TaxPolicyCrawlerScrapy.middlewares.BrowserDownloaderMiddleware.BrowserDownloaderMiddleware': 205,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 210,
-    "scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware": None,
-    "TaxPolicyCrawlerScrapy.middlewares.MyRetryMiddleware.MyRetryMiddleware": 302
+    # "scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware": None,
+    # 作废系统预置的重试，改为使用自定义的
+    'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
+    "TaxPolicyCrawlerScrapy.middlewares.MyRetryMiddleware.MyRetryMiddleware": 302,
 }
 
 # Enable or disable extensions
@@ -135,9 +138,16 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# ElasticSearch的服务地址
 ES_HOST = '172.16.20.43'
+ES_PORT = '9200'
 
+# 代理池服务的地址
 PROXY_HOST = '172.16.20.43'
+PROXY_PORT = '5000'
+
+# headless chrome的remote地址
+REMOTE_HEADLESS_CHROME = 'http://127.0.0.1:9515'
 
 # 重试设置
 RETRY_ENABLED = True
