@@ -91,10 +91,13 @@ COOKIES_ENABLED = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
+# 优先级从小到大，依次调用process_response()。设置为None，则作废该中间件
 DOWNLOADER_MIDDLEWARES = {
     'TaxPolicyCrawlerScrapy.middlewares.RandomUserAgentMiddleware.RandomUserAgentMiddleware': 100,
     'TaxPolicyCrawlerScrapy.middlewares.ProxyDownloaderMiddleware.ProxyDownloaderMiddleware': 200,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 210,
+    "scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware": None,
+    "TaxPolicyCrawlerScrapy.middlewares.MyRetryMiddleware.MyRetryMiddleware": 302
 }
 
 # Enable or disable extensions
@@ -131,6 +134,15 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+ES_HOST = '172.16.20.43'
+
+PROXY_HOST = '172.16.20.43'
+
+# 重试设置
+RETRY_ENABLED = True
+RETRY_TIMES = 10
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 408]
 
 # TODO shenxy 尝试深度优先抓取
 # DEPTH_PRIORITY
