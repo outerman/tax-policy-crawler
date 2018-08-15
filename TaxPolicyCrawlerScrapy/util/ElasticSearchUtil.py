@@ -3,8 +3,9 @@
 # Elasticsearch相关接口
 from elasticsearch import Elasticsearch
 import TaxPolicyCrawlerScrapy.util.Constants as Constants
+from TaxPolicyCrawlerScrapy import settings
 
-es = Elasticsearch(hosts=[{"host": Constants.es_host, "port": 9200}])
+es = Elasticsearch(hosts=[{"host": settings.ES_HOST, "port": 9200}])
 
 
 # 使用key在content里搜索

@@ -3,9 +3,6 @@
 # 常量类
 # 基本数据设定
 
-es_host = '172.16.20.43'
-proxy_host = '172.16.20.43'
-
 # 所有政策法规的爬取数据，都放到一个索引下
 es_index_name = 'tax_policy'
 # es_type_law = 'policy_law'
