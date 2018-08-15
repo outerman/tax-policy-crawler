@@ -2,8 +2,14 @@
 import threading
 import scrapy
 from bs4 import BeautifulSoup
+from pydispatch import dispatcher
+from scrapy import signals
+
+from TaxPolicyCrawlerScrapy import settings
 from TaxPolicyCrawlerScrapy.items import PolicyItem, PolicySource
 from TaxPolicyCrawlerScrapy.util import CacheUtil, Constants
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+from selenium.webdriver.chrome.options import Options
 
 # 国税总局，政策解读
 # http://www.chinatax.gov.cn/n810341/n810760/index.html
@@ -24,11 +30,24 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
     # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    # def __init__(self, **kwargs):
-    #     super().__init__(**kwargs)
-    #     self.name = self.__class__.name  # spider必须要有name属性，否则scrapy不做识别
-    #     self.policy_source['source'] = '国税总局'
-    #     self.policy_source['policyType'] = '政策解读'
+    # 是否使用browser
+    is_use_browser = True
+
+    def __init__(self, **kwargs):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+
+        # 对应的chromedriver的放置目录
+        # driver = webdriver.Chrome(executable_path=('/Applications/Google\ Chrome.app/Contents/MacOS/chromedriver'), chrome_options=chrome_options)
+        # 可以采用remote方式，连接单独启动的chromedriver
+        self.browser = RemoteWebDriver(settings.REMOTE_HEADLESS_CHROME, options=chrome_options)
+
+        super().__init__(**kwargs)
+        dispatcher.connect(self.spider_closed, signals.spider_closed)  # dispatcher.connect()信号分发器，第一个参数信号触发函数，第二个参数是触发信号，signals.spider_closed是爬虫结束信号
+
+    def spider_closed(self, spider):  # 信号触发函数
+        print('爬虫结束 停止爬虫')
+        self.browser.quit()
 
     def start_requests(self):
         yield scrapy.Request(base_url, method='GET', headers=self.headers, callback=self.parse_summary)
@@ -43,10 +62,10 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
             return
 
         # 第一页可直接解析
-        self.parse_list(response.body)
+        self.parse_list(response)  # TODO 第一次这个貌似进不去。。。
 
         # 爬取剩余的页
-        for page_index in range(1, page_count):
+        for page_index in range(1, 2):
             url = base_url.replace('index.html', 'index_831221_' + str(page_count - page_index) + '.html')
             yield scrapy.Request(url, method='GET', headers=self.headers, callback=self.parse_list)
 
@@ -73,7 +92,13 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
             yield scrapy.Request(full_url,
                                  method='GET',
                                  headers=self.headers,
-                                 meta={'policy_item': item})
+                                 meta={'policy_item': item},
+                                 priority=-1)
+
+        #     driver.get(full_url)
+        #     yield parse_policy_detail(driver.page_source, item)
+        #
+        # driver.close()
 
     # 默认解析器，在Request没有填写callback时调用：解析最后的详情，并发送到items及pipelines
     def parse(self, response):
@@ -85,16 +110,21 @@ def parse_item_summary(page_text):
     soup = BeautifulSoup(page_text, "lxml")
     table_tag = soup.find('table', {'class': 'pageN'})
 
-    td_str = table_tag.find('td').text
+    td_str = table_tag.find('td').text.replace('\n', '')
     start_flag = 'maxPageNum = '
     end_flag = ';'
     start = td_str.find(start_flag)
+    end = td_str.find(end_flag, start)
 
     if start < 0:
-        return start
+        # 使用browser以后，解析的方法不太一样
+        start_flag = '总页数:'
+        start = td_str.find(start_flag)
+        if start < 0:
+            return start
+        end = len(td_str)
 
     start += len(start_flag)
-    end = td_str.find(end_flag, start)
     return int(td_str[start: end])
 
 

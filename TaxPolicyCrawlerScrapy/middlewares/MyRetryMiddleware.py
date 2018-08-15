@@ -1,13 +1,12 @@
 import logging
 import random
-
 import time
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.utils.response import response_status_message
-
 from TaxPolicyCrawlerScrapy.util import ProxyMgr
 
 
+# 爬取重试中间件，当爬取失败时，把proxy从代理池中删除
 class MyRetryMiddleware(RetryMiddleware):
     logger = logging.getLogger(__name__)
 
