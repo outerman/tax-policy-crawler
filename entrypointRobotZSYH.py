@@ -139,6 +139,61 @@ class ZsyhRobot:
         # 解析数据，形成结构化json
         # return self.parse_bank_flow()
 
+def recognize_catche():
+    vericodeinfo = {
+        "url": "%s/web/common/captcha/image",
+        "libfile": "\\bin\other\grsds.dat",
+        "option": [{"index": 6, "value": 80}, {"index": 7, "value": -3}],
+        "calculator": False
+    }
+
+def main(*args, **kwargs):
+    browser = args[0]
+    data_json = args[1]
+    result_code = 0
+    result_msg = '登陆成功'
+    # 显示登陆框
+    script = 'xpath:\'//div[@class=\"login-mode-text J_AccountLogin\"]\'.event:jsclick;'
+    # 填写用户名
+    script += 'name:dlbz.event:clear,value="%s";' % get_json_value(data_json, 'userName')
+    # 填写密码
+    script += 'name:mm.event:value="%s";' % get_json_value(data_json, 'passWord')
+    parsing_operate_web(browser, browser, script)
+    # 填写验证码
+    vericode_info = vericodeinfo.copy()
+    url = get_json_value(data_json, 'url')
+    if url.strip() != '':
+        vericode_info['url'] = vericode_info['url'] % url.strip()
+    else:
+        vericode_info['url'] = vericode_info['url'] % browser.current_url
+    n = 3
+    while True:
+        vericode = captcha_recognition(browser, vericode_info)
+        if len(vericode) != 4:
+            continue
+        script = 'name:txyzm.event:clear,value="%s";' % vericode  # get_json_value(data_json, 'vericode')
+        # 点击登陆
+        script += 'xpath://a[@tax-text=\"i18n.yhdl_login_text\"].event:jsclick;'
+        parsing_operate_web(browser, browser, script)
+        time.sleep(2)
+        # 等待响应并判断是否登陆成功 1、是登陆；2、其它错误；3、是验证码错误
+        login_fail = parsing_operate_web(browser, browser,
+                                         '''xpath:"//span[@tax-text="compSigninErrorTip"]".event:text;''')
+        if login_fail is None:
+            result_code = 0
+        else:
+            result_msg = login_fail
+            if result_msg.strip() == '':
+                result_code = 0
+            elif result_msg.find("验证码") != -1:
+                result_code = 3
+            else:
+                result_code = 2
+        n -= 1
+        if (n == 0) or result_code in [0, 2]:
+            break
+
+    return result_code, result_msg
 
 # 测试执行
 robot = ZsyhRobot()
