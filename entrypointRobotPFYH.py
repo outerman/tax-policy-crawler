@@ -142,7 +142,6 @@ class PfyhRobot:
         # 解析数据，形成结构化json
         return self.parse_bank_flow()
 
-    # 通过模拟界面输入和点击的方式来查询
     def get_bank_flow_by_ui(self):
         begin_date = self.browser.find_element_by_id('BeginDate')
         end_date = self.browser.find_element_by_id('EndDate')
@@ -156,7 +155,6 @@ class PfyhRobot:
         end_date.send_keys('20190519')
         btn_query.click()
 
-    # 通过发送请求的方式来查询，暂未成功（ajax请求，并且返回的是jsp页面，可能需要执行js脚本？）
     def get_bank_flow(self):
         session = requests.session()
         # session.verify = False
@@ -191,5 +189,6 @@ def trans_table_to_json(table_bank_flow):
 
 # 测试执行
 robot = PfyhRobot()
+# Keymo.keyboard.press_key('1')
 if robot.check_load_exception():
     print(robot.fill_values())
