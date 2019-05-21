@@ -2,8 +2,14 @@
 import threading
 import scrapy
 from bs4 import BeautifulSoup
+from pydispatch import dispatcher
+from scrapy import signals
+
+from TaxPolicyCrawlerScrapy import settings
 from TaxPolicyCrawlerScrapy.items import PolicyItem, PolicySource
 from TaxPolicyCrawlerScrapy.util import CacheUtil, Constants
+from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+from selenium.webdriver.chrome.options import Options
 
 # 国税总局，税收法规库的抓取
 # http://hd.chinatax.gov.cn/guoshui/main.jsp
@@ -24,11 +30,28 @@ class TaxPolicyCrawler(scrapy.Spider):
     # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
+    # TODO 以下代码，用于启用browser来下载页面
     # def __init__(self, **kwargs):
+    #     chrome_options = Options()
+    #     chrome_options.add_argument("--headless")
+    #
+    #     # 对应的chromedriver的放置目录
+    #     # driver = webdriver.Chrome(executable_path=('/Applications/Google\ Chrome.app/Contents/MacOS/chromedriver'),
+    #                                   chrome_options=chrome_options)
+    #     # 可以采用remote方式，连接单独启动的chromedriver
+    #     self.browser = RemoteWebDriver(settings.REMOTE_HEADLESS_CHROME, options=chrome_options)
+    #
     #     super().__init__(**kwargs)
-    #     # self.name = self.__class__.name  # spider必须要有name属性，否则scrapy不做识别
-    #     self.policy_source['source'] = '国税总局'
-    #     self.policy_source['policyType'] = '税收法规库'
+    #     dispatcher.connect(self.spider_closed, signals.spider_closed)  # dispatcher.connect()信号分发器，第一个参数信号触发函数，第二个参数是触发信号，signals.spider_closed是爬虫结束信号
+    #
+    # def spider_closed(self, spider):  # 信号触发函数
+    #     print('爬虫结束 停止爬虫')
+    #     self.browser.quit()
+
+    # # TODO 以下设置，配置该spider不使用代理；（企图这么实现，现在代码还不行）
+    # custom_settings = {
+    #     'USE_PROXY': False
+    # }
 
     # 蜘蛛打开的时执行
     def open_spider(self, spider):
@@ -78,6 +101,7 @@ class TaxPolicyCrawler(scrapy.Spider):
                              method='POST',
                              body=form_data,
                              headers=self.headers,
+                             meta={'use_browser': False},
                              callback=self.parse_summary)
 
     # 刷新列表首页后的解析：获取分页数，然后根据分页抓取

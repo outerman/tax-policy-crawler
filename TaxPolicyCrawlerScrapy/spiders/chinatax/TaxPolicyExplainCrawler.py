@@ -30,9 +30,6 @@ class TaxPolicyExplainCrawler(scrapy.Spider):
     # 当前爬虫，request使用的headers
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    # 是否使用browser
-    is_use_browser = True
-
     def __init__(self, **kwargs):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
