@@ -12,6 +12,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+
+from TaxPolicyCrawlerScrapy import settings
 from TaxPolicyCrawlerScrapy.util import Keymo
 from TaxPolicyCrawlerScrapy.util import KeyDriverUtil
 import win32api
@@ -29,26 +31,7 @@ class ZsyhRobot:
     browser = None
 
     def __init__(self):
-        self.user_agent_list = [
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-            "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-            "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
-            "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-            "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-            "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-            "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"
-        ]
+        self.user_agent_list = settings.USER_AGENTS
         iedriver = 'D:\shenxy\chromedriver\IEDriverServer.exe'  # iedriver路径
         os.environ["webdriver.ie.driver"] = iedriver  # 设置环境变量
         self.browser = webdriver.Ie(iedriver)
@@ -86,9 +69,11 @@ class ZsyhRobot:
         login_btn = self.browser.find_element_by_id('btnlogin')
 
         # 2、填写账号
-        
 
-        n = 5
+        self.browser.implicitly_wait(0.5)
+
+        # 3、识别并填写验证码
+        n = 5   # 最多尝试5次识别验证码
         while n > 0:
             # 打验证码
             captcha_path = save_captcha(self.browser, self.browser.find_element_by_id('imgCaptcha'))
@@ -100,7 +85,7 @@ class ZsyhRobot:
             captcha_input.send_keys(Keys.BACKSPACE)
             captcha_input.send_keys(captcha)
 
-            # 点击登录
+            # 4、点击登录
             login_btn.click()
 
             result = EC.alert_is_present()(self.browser)
@@ -114,10 +99,11 @@ class ZsyhRobot:
                 print("没有alert，验证码识别正确  ")
                 break
 
-        # 跳转到“对账单打印”
+        # 5、跳转到“对账单打印”
         self.browser.get('https://app.cmbchina.com/cevs/StatementMain.aspx')
 
-        # 填写年月
+        # TODO 可以尝试通过requests请求“https://app.cmbchina.com/cevs/StatementMain.aspx”带上cookies，来请求，而不是界面点击
+        # 6、填写年月
         tyear = self.browser.find_element_by_id('tYear')
         tmonth = self.browser.find_element_by_id('tMonth')
         tyear.send_keys('2019')
@@ -125,7 +111,7 @@ class ZsyhRobot:
         select_month.select_by_value('4')
         self.browser.find_element_by_id('Button1').click()
 
-        # 解析数据，形成结构化json
+        # 7、解析数据，形成结构化json
         # return self.parse_bank_flow()
         bank_flow_result = trans_table_to_json(self.browser.find_element_by_id('vList'))
 
