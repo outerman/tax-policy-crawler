@@ -1102,29 +1102,31 @@ def captcha_recognition(*args, **kwargs):
         wm_library_dict["libid"] = lib_id
         WM_LIBRARY_LIST.append(wm_library_dict)
     # 获取cookie信息
-    cookies = browser.get_cookies()
+    # cookies = None  # browser.get_cookies()
     # 打印获取的cookies信息
     # print(cookies)
-    response = download_file(veri_code_info["url"], cookies)
-    if response.status_code == 200:
-        cookies = response.cookies.items()
-        print('回写cookies：', cookies)
-        if isinstance(cookies, list):
-            for cookie in cookies:
-                cookie_dict = {}
-                cookie_dict['name'] = cookie[0]
-                cookie_dict['value'] = cookie[1]
-                browser.add_cookie(cookie_dict)
-        now_time = datetime.datetime.now()
-        now_time_str = now_time.strftime("%Y%m%d%H%M%S")
-        temp_dir = cw_dir + "\\temp\captcha"
-        if not os.path.exists(temp_dir):
-            os.makedirs(temp_dir)
-        with open(temp_dir + "\\vcode_" + now_time_str + ".jpg", 'wb') as f:
-            f.write(response.content)
-            f.close()
-        b = response.content
-        veri_code = get_image_from_buffer_ex(lib_id, b)
+    # response = download_file(veri_code_info["url"], cookies)
+    # if response.status_code == 200:
+        # cookies = response.cookies.items()
+        # print('回写cookies：', cookies)
+        # if isinstance(cookies, list):
+        #     for cookie in cookies:
+        #         cookie_dict = {}
+        #         cookie_dict['name'] = cookie[0]
+        #         cookie_dict['value'] = cookie[1]
+        #         browser.add_cookie(cookie_dict)
+        # now_time = datetime.datetime.now()
+        # now_time_str = now_time.strftime("%Y%m%d%H%M%S")
+        # temp_dir = cw_dir + "\\temp\captcha"
+        # if not os.path.exists(temp_dir):
+        #     os.makedirs(temp_dir)
+        # with open(temp_dir + "\\vcode_" + now_time_str + ".jpg", 'wb') as f:
+        #     f.write(response.content)
+        #     f.close()
+        # b = response.content
+        # veri_code = get_image_from_buffer_ex(lib_id, b)
+
+        veri_code = get_image_from_file_ex(lib_id, veri_code_info['file_path'])
         print('验证码：', veri_code)
         if veri_code_info["calculator"]:
             veri_code = calculator(veri_code)

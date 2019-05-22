@@ -1,6 +1,9 @@
 # coding=utf-8
 # import random
+import datetime
 import time
+
+from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
@@ -15,9 +18,13 @@ import win32api
 import win32gui
 import requests
 import os
+from TaxPolicyCrawlerScrapy.wm_code import web_operation
 
 
 # 招商银行
+from TaxPolicyCrawlerScrapy.wm_code.common import SYS_PATCH
+
+
 class ZsyhRobot:
     browser = None
 
@@ -75,125 +82,94 @@ class ZsyhRobot:
         select_city = self.browser.find_element_by_id('ctyList')
         login_account = self.browser.find_element_by_id('LgCardId_Ctrl')
         login_pwd = self.browser.find_element_by_id('LgPasswd_Ctrl')
-        catcha_input = self.browser.find_element_by_id('tbCaptcha')
+        captcha_input = self.browser.find_element_by_id('tbCaptcha')
         login_btn = self.browser.find_element_by_id('btnlogin')
 
         # 2、填写账号
-        select_ctrl = Select(select_city)
-        select_ctrl.select_by_value('0010')
+        
 
-        KeyDriverUtil.key_press(0x0f)
-        # 110932257810501
-        KeyDriverUtil.key_press(0x02)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x02)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x0b)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x0a)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x04)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x03)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x03)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x06)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x08)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x09)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x02)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x0b)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x06)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x0b)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x02)
-        self.browser.implicitly_wait(0.5)
+        n = 3
+        while n > 0:
+            # 打验证码
+            captcha_path = save_captcha(self.browser, self.browser.find_element_by_id('imgCaptcha'))
+            captcha = recognize_captcha(self.browser, captcha_path)
+            print("本次验证码识别为：" + captcha)
+            captcha_input.send_keys(captcha)
 
-        KeyDriverUtil.key_press(0x0f)
-        KeyDriverUtil.key_press(0x0f)
-        # 574680
-        KeyDriverUtil.key_press(0x06)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x08)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x05)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x07)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x09)
-        self.browser.implicitly_wait(0.5)
-        KeyDriverUtil.key_press(0x0b)
-        self.browser.implicitly_wait(0.5)
+            # 点击登录
+            login_btn.click()
 
-        # 打验证码
+            result = EC.alert_is_present()(self.browser)
+            if result:
+                if n == 0:
+                    print(str(n) + "次都没有识别正确验证码，放弃了")
+                    return
+                n = n - 1
+                result.accept()
+            else:
+                print("没有alert，验证码识别正确  ")
+                break
 
-        # 点击登录
-        login_btn.click()
+        # 跳转到“对账单打印”
+        self.browser.get('https://app.cmbchina.com/cevs/StatementMain.aspx')
+
+        # 填写年月
+        tyear = self.browser.find_element_by_id('tYear')
+        tmonth = self.browser.find_element_by_id('tMonth')
+        tyear.send_keys('2019')
+        select_month = Select(tmonth)
+        select_month.select_by_value('4')
+        self.browser.find_element_by_id('Button1').click()
 
         # 解析数据，形成结构化json
         # return self.parse_bank_flow()
+        bank_flow_result = trans_table_to_json(self.browser.find_element_by_id('vList'))
 
-def recognize_catche():
-    vericodeinfo = {
-        "url": "%s/web/common/captcha/image",
-        "libfile": "\\bin\other\grsds.dat",
+        print(bank_flow_result)
+
+def recognize_captcha(browser, captcha_path):
+    # img_url = browser.find_element_by_id('imgCaptcha').get_attribute('src')
+    vericode_info = {
+        # "url": img_url,
+        "file_path": captcha_path,
+        "libfile": "\TaxPolicyCrawlerScrapy\wm_code\data\zsyh.dat",
         "option": [{"index": 6, "value": 80}, {"index": 7, "value": -3}],
-        "calculator": False
+        "calculator": False,
+        "libpassword": '123456'
     }
+    return web_operation.captcha_recognition(browser, vericode_info)
 
-def main(*args, **kwargs):
-    browser = args[0]
-    data_json = args[1]
-    result_code = 0
-    result_msg = '登陆成功'
-    # 显示登陆框
-    script = 'xpath:\'//div[@class=\"login-mode-text J_AccountLogin\"]\'.event:jsclick;'
-    # 填写用户名
-    script += 'name:dlbz.event:clear,value="%s";' % get_json_value(data_json, 'userName')
-    # 填写密码
-    script += 'name:mm.event:value="%s";' % get_json_value(data_json, 'passWord')
-    parsing_operate_web(browser, browser, script)
-    # 填写验证码
-    vericode_info = vericodeinfo.copy()
-    url = get_json_value(data_json, 'url')
-    if url.strip() != '':
-        vericode_info['url'] = vericode_info['url'] % url.strip()
-    else:
-        vericode_info['url'] = vericode_info['url'] % browser.current_url
-    n = 3
-    while True:
-        vericode = captcha_recognition(browser, vericode_info)
-        if len(vericode) != 4:
-            continue
-        script = 'name:txyzm.event:clear,value="%s";' % vericode  # get_json_value(data_json, 'vericode')
-        # 点击登陆
-        script += 'xpath://a[@tax-text=\"i18n.yhdl_login_text\"].event:jsclick;'
-        parsing_operate_web(browser, browser, script)
-        time.sleep(2)
-        # 等待响应并判断是否登陆成功 1、是登陆；2、其它错误；3、是验证码错误
-        login_fail = parsing_operate_web(browser, browser,
-                                         '''xpath:"//span[@tax-text="compSigninErrorTip"]".event:text;''')
-        if login_fail is None:
-            result_code = 0
-        else:
-            result_msg = login_fail
-            if result_msg.strip() == '':
-                result_code = 0
-            elif result_msg.find("验证码") != -1:
-                result_code = 3
-            else:
-                result_code = 2
-        n -= 1
-        if (n == 0) or result_code in [0, 2]:
-            break
 
-    return result_code, result_msg
+def save_captcha(driver, element):
+    action = ActionChains(driver).move_to_element(element)  # 移动到该元素
+    action.context_click(element)  # 右键点击该元素
+    action.send_keys(Keys.ARROW_DOWN)  # 点击键盘向下箭头
+    action.send_keys('s')  # 键盘输入V保存图
+    action.perform()  # 执行保存
+
+    time.sleep(2)
+    # driver.implicitly_wait(100)  # 等保存框弹出来
+    now_time = datetime.datetime.now()
+    now_time_str = now_time.strftime("%Y%m%d%H%M%S")
+    temp_dir = SYS_PATCH + "\\temp\captcha" + "\\vcode_" + now_time_str + ".jpg"
+
+    Keymo.press_paste(temp_dir)
+    Keymo.press_alt_and('s')
+    time.sleep(1)
+    return temp_dir
+
+
+def trans_table_to_json(table_bank_flow):
+    result = []
+    tr_list = table_bank_flow.find_elements_by_xpath(".//tbody//tr")
+    for tr in tr_list:
+        tr_ret = []
+        td_list = tr.find_elements_by_xpath('.//td')
+        for td in td_list:
+            tr_ret.append(td.text)
+        result.append(tr_ret)
+    return result
+
 
 # 测试执行
 robot = ZsyhRobot()

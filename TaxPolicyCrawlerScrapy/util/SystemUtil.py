@@ -1,14 +1,17 @@
 import getpass
+import os
 import socket
 import time
+
 import win32api
 import win32clipboard
 
 import psutil
 import win32con
 
-from common import Config
-from common.PrintUtil import *
+# from common import Config
+# from common.PrintUtil import *
+from TaxPolicyCrawlerScrapy.util import Config
 
 conf = Config.get_system_conf()
 try:
