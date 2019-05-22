@@ -1126,10 +1126,10 @@ def captcha_recognition(*args, **kwargs):
         # b = response.content
         # veri_code = get_image_from_buffer_ex(lib_id, b)
 
-        veri_code = get_image_from_file_ex(lib_id, veri_code_info['file_path'])
-        print('验证码：', veri_code)
-        if veri_code_info["calculator"]:
-            veri_code = calculator(veri_code)
+    veri_code = get_image_from_file_ex(lib_id, veri_code_info['file_path'])
+    print('验证码：', veri_code)
+    if veri_code_info["calculator"]:
+        veri_code = calculator(veri_code)
     return veri_code
     # print(vericode)
 

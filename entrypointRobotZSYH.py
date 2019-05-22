@@ -88,12 +88,16 @@ class ZsyhRobot:
         # 2、填写账号
         
 
-        n = 3
+        n = 5
         while n > 0:
             # 打验证码
             captcha_path = save_captcha(self.browser, self.browser.find_element_by_id('imgCaptcha'))
+            print("本地的验证码存储位置：" + captcha_path)
             captcha = recognize_captcha(self.browser, captcha_path)
             print("本次验证码识别为：" + captcha)
+            # 先清空
+            captcha_input.send_keys(Keys.CONTROL + 'a')
+            captcha_input.send_keys(Keys.BACKSPACE)
             captcha_input.send_keys(captcha)
 
             # 点击登录
@@ -127,17 +131,36 @@ class ZsyhRobot:
 
         print(bank_flow_result)
 
+
 def recognize_captcha(browser, captcha_path):
-    # img_url = browser.find_element_by_id('imgCaptcha').get_attribute('src')
+    # Private Declare Function SetWmOption Lib "WmCode.dll" (ByVal OptionIndex As Long,ByVal OptionValue As Long) As Boolean
+    # 函数功能说明：设定识别库选项。设定成功返回真，否则返回假。
+    # 函数参数说明：
+    # OptionIndex ：整数型，选项索引，取值范围1〜7
+    # OptionValue ：整数型，选项数值。
+    #
+    # 参数详解：
+    # 	OptionIndex	OptionValue
+    # 1.返回方式	取值范围：0〜1     默认为0,直接返回验证码,为1返回验证码字符和矩形范围形如：S,10,11,12,13|A,1,2,3,4 表示识别到文本 S 左边横坐标10,左边纵坐标11,右边横坐标,右边纵坐标12
+    # 2.识别方式    取值范围：0〜4     默认为0,0整体识别,1连通分割识别,2纵分割识别,3横分割识别,4横纵分割识别。可以进行分割的验证码，建议优先使用分割识别，因为分割后不仅能提高识别率，而且还能提高识别速度
+    # 3.识别模式	取值范围：0〜1     默认为0,0识图模式,1为识字模式。识图模式指的是背景白色视为透明不进行对比，识字模式指的是白色不视为透明，也加入对比。绝大多数我们都是使用识图模式，但是有少数部分验证码，使用识字模式更佳。
+    # 4.识别加速	取值范围：0〜1     默认为0,0为不加速,1为使用加速。一般我们建议开启加速功能，开启后对识别率几乎不影响。而且能提高3-5倍识别速度。
+    # 5.加速返回	取值范围：0〜1     默认为0,0为不加速返回,1为使用加速返回。使用加速返回一般用在粗体字识别的时候，可以大大提高识别速度，但是使用后，会稍微影响识别率。识别率有所下降。一般不是粗体字比较耗时的验证码，一般不用开启
+    # 6.最小相似度	取值范围：0〜100   默认为90
+    # 7.字符间隙    取值范围：-10〜0   默认为0,如果字符重叠,根据实际情况填写,如-3允许重叠3像素,如果不重叠的话,直接写0，注意：重叠和粘连概念不一样，粘连的话，其实字符间隙为0.
+
+    captcha_length = 4   # 固定验证码长度4
     vericode_info = {
         # "url": img_url,
         "file_path": captcha_path,
         "libfile": "\TaxPolicyCrawlerScrapy\wm_code\data\zsyh.dat",
-        "option": [{"index": 6, "value": 80}, {"index": 7, "value": -3}],
+        "option": [{"index": 2, "value": 2}, {"index": 6, "value": 80}, {"index": 7, "value": 3}],
         "calculator": False,
         "libpassword": '123456'
     }
-    return web_operation.captcha_recognition(browser, vericode_info)
+    tmp_captcha = web_operation.captcha_recognition(browser, vericode_info)
+
+    return (tmp_captcha + "1111")[0:captcha_length]   # 如果不足4位，补足4位
 
 
 def save_captcha(driver, element):
