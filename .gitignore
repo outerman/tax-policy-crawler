@@ -12,3 +12,7 @@ TaxPolicyCrawlerScrapy/util/__pycache__
 __pycache__
 tax_policy.xls
 /temp/captcha
+/build
+/dist
+/temp
+/*.spec
